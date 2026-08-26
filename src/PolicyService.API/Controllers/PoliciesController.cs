@@ -1,0 +1,78 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PolicyService.Application.Abstractions.Customers;
+using PolicyService.Application.Contracts.Policies;
+using PolicyService.Application.Services;
+
+namespace PolicyService.API.Controllers;
+
+[ApiController]
+[Authorize]
+[Route("api/[controller]")]
+public sealed class PoliciesController(
+    ICreatePolicyService createPolicyService,
+    IGetPolicyService getPolicyService,
+    IUpdatePolicyService updatePolicyService,
+    IPolicyTypeQueryService policyTypeQueryService,
+    ICustomerAccessValidator customerAccessValidator) : ControllerBase
+{
+    [HttpGet("mine")]
+    [ProducesResponseType<IReadOnlyCollection<PolicyResponse>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMine([FromQuery] Guid customerId, CancellationToken cancellationToken)
+    {
+        var actor = GetActor();
+        await customerAccessValidator.EnsureAccessAsync(customerId, actor.IdentityUserId, actor.CanManageAnyPolicy, cancellationToken);
+        return Ok(await getPolicyService.GetByCustomerIdAsync(customerId, cancellationToken));
+    }
+
+    [HttpPost]
+    [ProducesResponseType<PolicyResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Create(CreatePolicyRequest request, CancellationToken cancellationToken)
+    {
+        var response = await createPolicyService.CreateAsync(request, GetActor(), cancellationToken);
+        return Ok(response);
+    }
+
+    [HttpGet("{policyId:guid}")]
+    [ProducesResponseType<PolicyResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(Guid policyId, CancellationToken cancellationToken)
+    {
+        var response = await getPolicyService.GetByIdAsync(policyId, cancellationToken);
+        return Ok(response);
+    }
+
+    [HttpPut("{policyId:guid}")]
+    [ProducesResponseType<PolicyResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(Guid policyId, UpdatePolicyRequest request, CancellationToken cancellationToken)
+    {
+        var response = await updatePolicyService.UpdateAsync(policyId, request, GetActor(), cancellationToken);
+        return Ok(response);
+    }
+
+    [HttpGet("types")]
+    [ProducesResponseType<IReadOnlyCollection<PolicyTypeResponse>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPolicyTypes(CancellationToken cancellationToken)
+    {
+        var response = await policyTypeQueryService.GetAllAsync(cancellationToken);
+        return Ok(response);
+    }
+
+    private PolicyActor GetActor()
+    {
+        var identityUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(identityUserId, out var userId))
+        {
+            throw new UnauthorizedAccessException("The access token does not contain a valid user identifier.");
+        }
+
+        return new PolicyActor(
+            userId,
+            User.IsInRole("Admin") || User.HasClaim("permission", "Policy.Write.Any"));
+    }
+}
