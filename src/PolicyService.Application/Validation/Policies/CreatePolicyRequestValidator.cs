@@ -28,11 +28,6 @@ public sealed class CreatePolicyRequestValidator : IValidator<CreatePolicyReques
             throw new ValidationException("Policy start date cannot be after the end date.");
         }
 
-        if (value.PremiumAmount <= 0)
-        {
-            throw new ValidationException("Premium amount must be greater than zero.");
-        }
-
         if (value.Coverages.Count == 0)
         {
             throw new ValidationException("At least one coverage is required.");

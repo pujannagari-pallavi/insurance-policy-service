@@ -33,6 +33,19 @@ public sealed class GetPolicyServiceTests
         Assert.Equal("Policy was not found.", exception.Message);
     }
 
+    [Fact]
+    public async Task GetAllAsync_ReturnsMappedPolicies()
+    {
+        var policy = TestPolicyFactory.CreatePolicy();
+        var service = new GetPolicyService(new FakePolicyRepository(policy), new PolicyResponseFactory());
+
+        var response = await service.GetAllAsync();
+
+        var returnedPolicy = Assert.Single(response);
+        Assert.Equal(policy.Id, returnedPolicy.Id);
+        Assert.Equal(policy.PolicyNumber, returnedPolicy.PolicyNumber);
+    }
+
     private sealed class FakePolicyRepository(Policy? policy) : IPolicyRepository
     {
         public Task<Policy?> GetByIdAsync(Guid policyId, CancellationToken cancellationToken = default)
@@ -46,6 +59,11 @@ public sealed class GetPolicyServiceTests
         }
 
         public Task<IReadOnlyCollection<Policy>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<Policy>>(policy is null ? [] : [policy]);
+        }
+
+        public Task<IReadOnlyCollection<Policy>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<IReadOnlyCollection<Policy>>(policy is null ? [] : [policy]);
         }

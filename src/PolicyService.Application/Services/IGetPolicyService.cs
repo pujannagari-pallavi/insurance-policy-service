@@ -7,4 +7,6 @@ public interface IGetPolicyService
     Task<PolicyResponse> GetByIdAsync(Guid policyId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<PolicyResponse>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<PolicyResponse>> GetAllAsync(CancellationToken cancellationToken = default);
 }

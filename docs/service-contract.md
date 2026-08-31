@@ -25,6 +25,20 @@ Validate Identity Service JWTs locally with issuer `InsurancePlatform.Identity` 
 
 The service verifies that `CustomerId` exists and that the caller owns the customer identity, unless the caller has the `Admin` role or `Policy.Write.Any` permission.
 
+## Rating And Underwriting
+
+The Policy Service calculates the final premium on the server. Client-provided premium values are ignored. The calculation uses the selected product's base premium, total sum insured, deductible, and policy term. Product-specific reference coverage amounts are used for Health Standard, Auto Comprehensive, and Life Protect.
+
+New policies start as `Draft`. Customers can edit only draft policies. An administrator or user with `Policy.Write.Any` can submit a controlled status transition with `PATCH /api/policies/{policyId}/status`:
+
+- `Draft` to `PendingApproval` or `Cancelled`
+- `PendingApproval` to `Active` or `Cancelled`
+- `Active` to `Lapsed`, `Cancelled`, or `Expired`
+
+The transition request requires a target `status` and non-empty underwriting `remarks`. Every transition is recorded in the policy history.
+
+Administrators and users with `Policy.Write.Any` can retrieve the underwriting queue with `GET /api/policies`. Other users can retrieve only their own policies through `GET /api/policies/mine?customerId={customerId}`.
+
 ## Events
 
 Policy Service consumes customer lifecycle events and reserves `policy.created.v1` and `policy.updated.v1` for notification, billing, and reporting consumers.

@@ -17,6 +17,7 @@ public sealed class PoliciesControllerIntegrationTests
             new ThrowingCreatePolicyService(new ValidationException("Policy number is required.")),
             new StubGetPolicyService(),
             new StubUpdatePolicyService(),
+            new StubUnderwritePolicyService(),
             new StubPolicyTypeQueryService());
         using var client = factory.CreateClient();
 
@@ -38,6 +39,7 @@ public sealed class PoliciesControllerIntegrationTests
             new StubCreatePolicyService(),
             new ThrowingGetPolicyService(new NotFoundException("Policy was not found.")),
             new StubUpdatePolicyService(),
+            new StubUnderwritePolicyService(),
             new StubPolicyTypeQueryService());
         using var client = factory.CreateClient();
 
@@ -59,6 +61,7 @@ public sealed class PoliciesControllerIntegrationTests
             new StubCreatePolicyService(),
             new StubGetPolicyService(),
             new StubUpdatePolicyService(),
+            new StubUnderwritePolicyService(),
             new StubPolicyTypeQueryService());
         using var client = factory.CreateClient();
 
@@ -89,6 +92,11 @@ public sealed class PoliciesControllerIntegrationTests
         {
             return Task.FromException<IReadOnlyCollection<PolicyResponse>>(exception);
         }
+
+        public Task<IReadOnlyCollection<PolicyResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromException<IReadOnlyCollection<PolicyResponse>>(exception);
+        }
     }
 
     private sealed class StubCreatePolicyService : ICreatePolicyService
@@ -113,6 +121,11 @@ public sealed class PoliciesControllerIntegrationTests
         {
             return Task.FromResult<IReadOnlyCollection<PolicyResponse>>([CreateResponse()]);
         }
+
+        public Task<IReadOnlyCollection<PolicyResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<PolicyResponse>>([CreateResponse()]);
+        }
     }
 
     private sealed class StubUpdatePolicyService : IUpdatePolicyService
@@ -120,6 +133,18 @@ public sealed class PoliciesControllerIntegrationTests
         public Task<PolicyResponse> UpdateAsync(
             Guid policyId,
             UpdatePolicyRequest request,
+            PolicyActor actor,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(CreateResponse(policyId));
+        }
+    }
+
+    private sealed class StubUnderwritePolicyService : IUnderwritePolicyService
+    {
+        public Task<PolicyResponse> TransitionAsync(
+            Guid policyId,
+            TransitionPolicyStatusRequest request,
             PolicyActor actor,
             CancellationToken cancellationToken = default)
         {

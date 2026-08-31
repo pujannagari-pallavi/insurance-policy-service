@@ -24,6 +24,7 @@ public sealed class CreatePolicyServiceTests
             unitOfWork,
             new PassThroughValidator<CreatePolicyRequest>(),
             new FakeCustomerAccessValidator(),
+            new PremiumRatingService(),
             new PolicyResponseFactory());
 
         var response = await service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
@@ -50,6 +51,7 @@ public sealed class CreatePolicyServiceTests
             new FakeUnitOfWork(),
             new PassThroughValidator<CreatePolicyRequest>(),
             new FakeCustomerAccessValidator(),
+            new PremiumRatingService(),
             new PolicyResponseFactory());
 
         var action = () => service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
@@ -69,6 +71,7 @@ public sealed class CreatePolicyServiceTests
             unitOfWork,
             new PassThroughValidator<CreatePolicyRequest>(),
             new FakeCustomerAccessValidator(new ForbiddenException("You are not allowed to manage policies for this customer.")),
+            new PremiumRatingService(),
             new PolicyResponseFactory());
 
         var action = () => service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
@@ -97,6 +100,11 @@ public sealed class CreatePolicyServiceTests
         }
 
         public Task<IReadOnlyCollection<Policy>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<Policy>>([]);
+        }
+
+        public Task<IReadOnlyCollection<Policy>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<IReadOnlyCollection<Policy>>([]);
         }

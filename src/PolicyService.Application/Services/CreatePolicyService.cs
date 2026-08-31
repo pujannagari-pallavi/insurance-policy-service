@@ -13,6 +13,7 @@ public sealed class CreatePolicyService(
     IUnitOfWork unitOfWork,
     IValidator<CreatePolicyRequest> validator,
     ICustomerAccessValidator customerAccessValidator,
+    IPremiumRatingService premiumRatingService,
     PolicyResponseFactory policyResponseFactory) : ICreatePolicyService
 {
     public async Task<PolicyResponse> CreateAsync(
@@ -37,6 +38,12 @@ public sealed class CreatePolicyService(
         var policyType = await policyTypeRepository.GetByIdAsync(request.PolicyTypeId, cancellationToken)
             ?? throw new NotFoundException("Policy type was not found.");
 
+        var premiumAmount = premiumRatingService.CalculateAnnualPremium(
+            policyType,
+            request.Coverages,
+            request.StartDate,
+            request.EndDate);
+
         var policy = new Policy(
             Guid.NewGuid(),
             request.PolicyNumber,
@@ -44,7 +51,7 @@ public sealed class CreatePolicyService(
             request.PolicyTypeId,
             request.StartDate,
             request.EndDate,
-            request.PremiumAmount);
+            premiumAmount);
 
         policy.AttachPolicyType(policyType);
         policy.SetCoverages(MapCoverages(request.Coverages));

@@ -84,4 +84,25 @@ public sealed class Policy
         _history.Add(new PolicyHistory(Guid.NewGuid(), action, status, remarks));
         UpdatedAtUtc = DateTime.UtcNow;
     }
+
+    public void TransitionTo(PolicyStatus status, string remarks)
+    {
+        Status = status;
+        AddHistory($"Status changed to {status}", status, remarks);
+    }
+
+    public static bool CanTransition(PolicyStatus currentStatus, PolicyStatus targetStatus)
+    {
+        return (currentStatus, targetStatus) switch
+        {
+            (PolicyStatus.Draft, PolicyStatus.PendingApproval) => true,
+            (PolicyStatus.Draft, PolicyStatus.Cancelled) => true,
+            (PolicyStatus.PendingApproval, PolicyStatus.Active) => true,
+            (PolicyStatus.PendingApproval, PolicyStatus.Cancelled) => true,
+            (PolicyStatus.Active, PolicyStatus.Lapsed) => true,
+            (PolicyStatus.Active, PolicyStatus.Cancelled) => true,
+            (PolicyStatus.Active, PolicyStatus.Expired) => true,
+            _ => false
+        };
+    }
 }

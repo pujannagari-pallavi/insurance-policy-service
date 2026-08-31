@@ -21,4 +21,10 @@ public sealed class GetPolicyService(
         var policies = await policyRepository.GetByCustomerIdAsync(customerId, cancellationToken);
         return policies.Select(policyResponseFactory.Create).ToArray();
     }
+
+    public async Task<IReadOnlyCollection<PolicyResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var policies = await policyRepository.GetAllAsync(cancellationToken);
+        return policies.Select(policyResponseFactory.Create).ToArray();
+    }
 }

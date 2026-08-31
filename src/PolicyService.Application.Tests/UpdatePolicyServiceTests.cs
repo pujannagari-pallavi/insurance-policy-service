@@ -30,12 +30,14 @@ public sealed class UpdatePolicyServiceTests
             unitOfWork,
             new PassThroughValidator<UpdatePolicyRequest>(),
             new FakeCustomerAccessValidator(),
+            new PremiumRatingService(),
             new PolicyResponseFactory());
 
-        var response = await service.UpdateAsync(policy.Id, TestRequests.UpdatePolicyRequest(), TestActors.Default);
+        var request = TestRequests.UpdatePolicyRequest() with { Status = PolicyStatus.Draft };
+        var response = await service.UpdateAsync(policy.Id, request, TestActors.Default);
 
-        Assert.Equal(PolicyStatus.Active, policy.Status);
-        Assert.Equal(16000m, policy.PremiumAmount);
+        Assert.Equal(PolicyStatus.Draft, policy.Status);
+        Assert.NotEqual(16000m, policy.PremiumAmount);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
         Assert.Equal("Auto Comprehensive", response.PolicyType.Name);
     }
@@ -49,6 +51,7 @@ public sealed class UpdatePolicyServiceTests
             new FakeUnitOfWork(),
             new PassThroughValidator<UpdatePolicyRequest>(),
             new FakeCustomerAccessValidator(),
+            new PremiumRatingService(),
             new PolicyResponseFactory());
 
         var action = () => service.UpdateAsync(Guid.NewGuid(), TestRequests.UpdatePolicyRequest(), TestActors.Default);
@@ -70,6 +73,11 @@ public sealed class UpdatePolicyServiceTests
         }
 
         public Task<IReadOnlyCollection<Policy>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<Policy>>(policy is null ? [] : [policy]);
+        }
+
+        public Task<IReadOnlyCollection<Policy>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<IReadOnlyCollection<Policy>>(policy is null ? [] : [policy]);
         }

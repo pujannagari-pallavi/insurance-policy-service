@@ -36,6 +36,17 @@ public sealed class PolicyRepository(PolicyDbContext dbContext) : IPolicyReposit
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Policy>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Policies
+            .AsNoTracking()
+            .Include(policy => policy.PolicyType)
+            .Include(policy => policy.Coverages)
+            .Include(policy => policy.History)
+            .OrderByDescending(policy => policy.CreatedAtUtc)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public Task AddAsync(Policy policy, CancellationToken cancellationToken = default)
     {
         return dbContext.Policies.AddAsync(policy, cancellationToken).AsTask();

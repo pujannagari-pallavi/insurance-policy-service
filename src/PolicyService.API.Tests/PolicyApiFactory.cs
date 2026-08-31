@@ -11,6 +11,7 @@ public sealed class PolicyApiFactory(
     ICreatePolicyService createPolicyService,
     IGetPolicyService getPolicyService,
     IUpdatePolicyService updatePolicyService,
+    IUnderwritePolicyService underwritePolicyService,
     IPolicyTypeQueryService policyTypeQueryService) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -29,11 +30,13 @@ public sealed class PolicyApiFactory(
             services.RemoveAll<ICreatePolicyService>();
             services.RemoveAll<IGetPolicyService>();
             services.RemoveAll<IUpdatePolicyService>();
+            services.RemoveAll<IUnderwritePolicyService>();
             services.RemoveAll<IPolicyTypeQueryService>();
 
             services.AddSingleton(createPolicyService);
             services.AddSingleton(getPolicyService);
             services.AddSingleton(updatePolicyService);
+            services.AddSingleton(underwritePolicyService);
             services.AddSingleton(policyTypeQueryService);
         });
     }

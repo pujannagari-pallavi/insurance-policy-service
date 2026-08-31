@@ -10,5 +10,7 @@ public interface IPolicyRepository
 
     Task<IReadOnlyCollection<Policy>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Policy>> GetAllAsync(CancellationToken cancellationToken = default);
+
     Task AddAsync(Policy policy, CancellationToken cancellationToken = default);
 }

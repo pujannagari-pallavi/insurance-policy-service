@@ -36,9 +36,11 @@ public static class DependencyInjection
         services.AddScoped<IValidator<CreatePolicyRequest>, CreatePolicyRequestValidator>();
         services.AddScoped<IValidator<UpdatePolicyRequest>, UpdatePolicyRequestValidator>();
         services.AddScoped<PolicyResponseFactory>();
+        services.AddScoped<IPremiumRatingService, PremiumRatingService>();
         services.AddScoped<ICreatePolicyService, CreatePolicyService>();
         services.AddScoped<IGetPolicyService, GetPolicyService>();
         services.AddScoped<IUpdatePolicyService, UpdatePolicyService>();
+        services.AddScoped<IUnderwritePolicyService, UnderwritePolicyService>();
         services.AddScoped<IPolicyTypeQueryService, PolicyTypeQueryService>();
 
         return services;

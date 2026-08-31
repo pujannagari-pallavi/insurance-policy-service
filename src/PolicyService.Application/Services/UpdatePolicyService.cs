@@ -13,6 +13,7 @@ public sealed class UpdatePolicyService(
     IUnitOfWork unitOfWork,
     IValidator<UpdatePolicyRequest> validator,
     ICustomerAccessValidator customerAccessValidator,
+    IPremiumRatingService premiumRatingService,
     PolicyResponseFactory policyResponseFactory) : IUpdatePolicyService
 {
     public async Task<PolicyResponse> UpdateAsync(
@@ -26,6 +27,11 @@ public sealed class UpdatePolicyService(
         var policy = await policyRepository.GetByIdAsync(policyId, cancellationToken)
             ?? throw new NotFoundException("Policy was not found.");
 
+        if (policy.Status is not PolicyStatus.Draft || request.Status is not PolicyStatus.Draft)
+        {
+            throw new ValidationException("Only draft policies can be edited. Use the underwriting status endpoint to change policy status.");
+        }
+
         await customerAccessValidator.EnsureAccessAsync(
             request.CustomerId,
             actor.IdentityUserId,
@@ -35,13 +41,19 @@ public sealed class UpdatePolicyService(
         var policyType = await policyTypeRepository.GetByIdAsync(request.PolicyTypeId, cancellationToken)
             ?? throw new NotFoundException("Policy type was not found.");
 
+        var premiumAmount = premiumRatingService.CalculateAnnualPremium(
+            policyType,
+            request.Coverages,
+            request.StartDate,
+            request.EndDate);
+
         policy.AttachPolicyType(policyType);
         policy.Update(
             request.CustomerId,
             request.PolicyTypeId,
             request.StartDate,
             request.EndDate,
-            request.PremiumAmount,
+            premiumAmount,
             request.Status,
             request.Remarks);
         policy.SetCoverages(MapCoverages(request.Coverages));

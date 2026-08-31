@@ -14,6 +14,7 @@ public sealed class PoliciesController(
     ICreatePolicyService createPolicyService,
     IGetPolicyService getPolicyService,
     IUpdatePolicyService updatePolicyService,
+    IUnderwritePolicyService underwritePolicyService,
     IPolicyTypeQueryService policyTypeQueryService,
     ICustomerAccessValidator customerAccessValidator) : ControllerBase
 {
@@ -24,6 +25,19 @@ public sealed class PoliciesController(
         var actor = GetActor();
         await customerAccessValidator.EnsureAccessAsync(customerId, actor.IdentityUserId, actor.CanManageAnyPolicy, cancellationToken);
         return Ok(await getPolicyService.GetByCustomerIdAsync(customerId, cancellationToken));
+    }
+
+    [HttpGet]
+    [ProducesResponseType<IReadOnlyCollection<PolicyResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        if (!GetActor().CanManageAnyPolicy)
+        {
+            return Forbid();
+        }
+
+        return Ok(await getPolicyService.GetAllAsync(cancellationToken));
     }
 
     [HttpPost]
@@ -52,6 +66,20 @@ public sealed class PoliciesController(
     public async Task<IActionResult> Update(Guid policyId, UpdatePolicyRequest request, CancellationToken cancellationToken)
     {
         var response = await updatePolicyService.UpdateAsync(policyId, request, GetActor(), cancellationToken);
+        return Ok(response);
+    }
+
+    [HttpPatch("{policyId:guid}/status")]
+    [ProducesResponseType<PolicyResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> TransitionStatus(
+        Guid policyId,
+        TransitionPolicyStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await underwritePolicyService.TransitionAsync(policyId, request, GetActor(), cancellationToken);
         return Ok(response);
     }
 
