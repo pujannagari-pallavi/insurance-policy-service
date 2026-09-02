@@ -7,7 +7,6 @@ public sealed record UpdatePolicyRequest(
     Guid PolicyTypeId,
     DateOnly StartDate,
     DateOnly EndDate,
-    decimal PremiumAmount,
     PolicyStatus Status,
     IReadOnlyCollection<CoverageRequest> Coverages,
     string Remarks);

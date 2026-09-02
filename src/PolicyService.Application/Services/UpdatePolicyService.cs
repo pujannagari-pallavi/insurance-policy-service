@@ -36,6 +36,7 @@ public sealed class UpdatePolicyService(
             request.CustomerId,
             actor.IdentityUserId,
             actor.CanManageAnyPolicy,
+            requireVerifiedKyc: true,
             cancellationToken);
 
         var policyType = await policyTypeRepository.GetByIdAsync(request.PolicyTypeId, cancellationToken)

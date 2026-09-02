@@ -6,5 +6,6 @@ public interface ICustomerAccessValidator
         Guid customerId,
         Guid identityUserId,
         bool canManageAnyPolicy,
+        bool requireVerifiedKyc = false,
         CancellationToken cancellationToken = default);
 }

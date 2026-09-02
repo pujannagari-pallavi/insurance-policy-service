@@ -30,34 +30,12 @@ public sealed class CreatePolicyServiceTests
         var response = await service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
 
         Assert.NotNull(repository.AddedPolicy);
-        Assert.Equal("POL-2026-0001", repository.AddedPolicy!.PolicyNumber);
+        Assert.StartsWith("SC-2026-", repository.AddedPolicy!.PolicyNumber);
         Assert.Single(repository.AddedPolicy.Coverages);
         Assert.NotEmpty(repository.AddedPolicy.History);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
         Assert.Equal(repository.AddedPolicy.Id, response.Id);
         Assert.Equal("Health Standard", response.PolicyType.Name);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WhenPolicyNumberAlreadyExists_ThrowsValidationException()
-    {
-        var repository = new FakePolicyRepository
-        {
-            PolicyByPolicyNumber = TestPolicyFactory.CreatePolicy()
-        };
-        var service = new CreatePolicyService(
-            repository,
-            new FakePolicyTypeRepository(TestPolicyFactory.CreatePolicyType()),
-            new FakeUnitOfWork(),
-            new PassThroughValidator<CreatePolicyRequest>(),
-            new FakeCustomerAccessValidator(),
-            new PremiumRatingService(),
-            new PolicyResponseFactory());
-
-        var action = () => service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
-
-        var exception = await Assert.ThrowsAsync<ValidationException>(action);
-        Assert.Equal("A policy with this policy number already exists.", exception.Message);
     }
 
     [Fact]
@@ -154,6 +132,7 @@ internal sealed class FakeCustomerAccessValidator(Exception? exception = null) :
         Guid customerId,
         Guid identityUserId,
         bool canManageAnyPolicy,
+        bool requireVerifiedKyc = false,
         CancellationToken cancellationToken = default)
     {
         return exception is null ? Task.CompletedTask : Task.FromException(exception);
@@ -162,7 +141,7 @@ internal sealed class FakeCustomerAccessValidator(Exception? exception = null) :
 
 internal static class TestActors
 {
-    public static readonly PolicyActor Default = new(Guid.Parse("93CD493C-126D-494F-B955-3AE5C0239CFC"), false);
+    public static readonly PolicyActor Default = new(Guid.Parse("93CD493C-126D-494F-B955-3AE5C0239CFC"), false, false);
 }
 
 internal static class TestRequests
@@ -173,12 +152,10 @@ internal static class TestRequests
     public static CreatePolicyRequest CreatePolicyRequest()
     {
         return new CreatePolicyRequest(
-            "POL-2026-0001",
             Guid.Parse("1B4AB7AA-C2D4-4A7A-9BE9-54EB46066001"),
             HealthPolicyTypeId,
             new DateOnly(2026, 8, 1),
             new DateOnly(2027, 7, 31),
-            14000m,
             [new CoverageRequest("Hospitalization", "In-patient hospitalization coverage.", 500000m, 10000m)],
             "Initial policy creation.");
     }
@@ -190,7 +167,6 @@ internal static class TestRequests
             AutoPolicyTypeId,
             new DateOnly(2026, 9, 1),
             new DateOnly(2027, 8, 31),
-            16000m,
             PolicyStatus.Active,
             [new CoverageRequest("Collision", "Collision protection coverage.", 650000m, 15000m)],
             "Policy activated after review.");

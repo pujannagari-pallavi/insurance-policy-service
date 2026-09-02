@@ -23,7 +23,7 @@ public sealed class PoliciesController(
     public async Task<IActionResult> GetMine([FromQuery] Guid customerId, CancellationToken cancellationToken)
     {
         var actor = GetActor();
-        await customerAccessValidator.EnsureAccessAsync(customerId, actor.IdentityUserId, actor.CanManageAnyPolicy, cancellationToken);
+        await customerAccessValidator.EnsureAccessAsync(customerId, actor.IdentityUserId, actor.CanManageAnyPolicy, cancellationToken: cancellationToken);
         return Ok(await getPolicyService.GetByCustomerIdAsync(customerId, cancellationToken));
     }
 
@@ -101,6 +101,7 @@ public sealed class PoliciesController(
 
         return new PolicyActor(
             userId,
-            User.IsInRole("Admin") || User.HasClaim("permission", "Policy.Write.Any"));
+            User.HasClaim("permission", "Policy.Write.Any"),
+            User.HasClaim("permission", "Policy.Approve"));
     }
 }

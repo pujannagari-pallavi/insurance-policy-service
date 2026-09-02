@@ -23,16 +23,11 @@ public sealed class CreatePolicyService(
     {
         validator.Validate(request);
 
-        var existingPolicy = await policyRepository.GetByPolicyNumberAsync(request.PolicyNumber, cancellationToken);
-        if (existingPolicy is not null)
-        {
-            throw new ValidationException("A policy with this policy number already exists.");
-        }
-
         await customerAccessValidator.EnsureAccessAsync(
             request.CustomerId,
             actor.IdentityUserId,
             actor.CanManageAnyPolicy,
+            requireVerifiedKyc: true,
             cancellationToken);
 
         var policyType = await policyTypeRepository.GetByIdAsync(request.PolicyTypeId, cancellationToken)
@@ -46,7 +41,7 @@ public sealed class CreatePolicyService(
 
         var policy = new Policy(
             Guid.NewGuid(),
-            request.PolicyNumber,
+            GeneratePolicyNumber(),
             request.CustomerId,
             request.PolicyTypeId,
             request.StartDate,
@@ -68,5 +63,10 @@ public sealed class CreatePolicyService(
         return requests
             .Select(request => new Coverage(Guid.NewGuid(), request.Name, request.Description, request.SumInsured, request.Deductible))
             .ToArray();
+    }
+
+    private static string GeneratePolicyNumber()
+    {
+        return $"SC-{DateTime.UtcNow:yyyy}-{Guid.NewGuid().ToString("N")[..10].ToUpperInvariant()}";
     }
 }

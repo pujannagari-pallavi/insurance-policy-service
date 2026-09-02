@@ -10,12 +10,10 @@ public sealed class UpdatePolicyRequestValidator : IValidator<UpdatePolicyReques
     public void Validate(UpdatePolicyRequest value)
     {
         _createPolicyRequestValidator.Validate(new CreatePolicyRequest(
-            "policy-number",
             value.CustomerId,
             value.PolicyTypeId,
             value.StartDate,
             value.EndDate,
-            value.PremiumAmount,
             value.Coverages,
             value.Remarks));
     }

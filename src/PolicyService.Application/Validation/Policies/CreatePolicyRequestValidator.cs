@@ -8,11 +8,6 @@ public sealed class CreatePolicyRequestValidator : IValidator<CreatePolicyReques
 {
     public void Validate(CreatePolicyRequest value)
     {
-        if (string.IsNullOrWhiteSpace(value.PolicyNumber))
-        {
-            throw new ValidationException("Policy number is required.");
-        }
-
         if (value.CustomerId == Guid.Empty)
         {
             throw new ValidationException("Customer id is required.");

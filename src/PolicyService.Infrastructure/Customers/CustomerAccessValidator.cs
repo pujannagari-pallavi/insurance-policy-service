@@ -15,6 +15,7 @@ public sealed class CustomerAccessValidator(
         Guid customerId,
         Guid identityUserId,
         bool canManageAnyPolicy,
+        bool requireVerifiedKyc = false,
         CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"api/customers/{customerId}");
@@ -45,6 +46,11 @@ public sealed class CustomerAccessValidator(
                 throw new ValidationException("Policies cannot be managed for an inactive customer.");
             }
 
+            if (requireVerifiedKyc && customer.Kyc?.Status != 2)
+            {
+                throw new ValidationException("KYC verification is required before a policy application can be submitted.");
+            }
+
             if (!canManageAnyPolicy && customer.IdentityUserId != identityUserId)
             {
                 throw new ForbiddenException("You are not allowed to manage policies for this customer.");
@@ -56,5 +62,7 @@ public sealed class CustomerAccessValidator(
         }
     }
 
-    private sealed record CustomerLookupResponse(Guid Id, Guid? IdentityUserId, bool IsActive);
+    private sealed record CustomerLookupResponse(Guid Id, Guid? IdentityUserId, bool IsActive, KycLookupResponse? Kyc);
+
+    private sealed record KycLookupResponse(int Status);
 }

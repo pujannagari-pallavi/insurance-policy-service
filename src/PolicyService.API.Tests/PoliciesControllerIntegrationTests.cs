@@ -182,12 +182,10 @@ public sealed class PoliciesControllerIntegrationTests
     private static CreatePolicyRequest CreateRequest()
     {
         return new CreatePolicyRequest(
-            "POL-2026-0001",
             Guid.NewGuid(),
             Guid.NewGuid(),
             new DateOnly(2026, 8, 1),
             new DateOnly(2027, 7, 31),
-            14000m,
             [new CoverageRequest("Hospitalization", "In-patient hospitalization coverage.", 500000m, 10000m)],
             "Initial policy creation.");
     }

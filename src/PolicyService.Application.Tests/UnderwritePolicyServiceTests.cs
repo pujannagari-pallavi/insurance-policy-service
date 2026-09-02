@@ -13,12 +13,12 @@ public sealed class UnderwritePolicyServiceTests
     {
         var policy = TestPolicyFactory.CreatePolicy();
         var unitOfWork = new FakeUnitOfWork();
-        var service = new UnderwritePolicyService(new FakePolicyRepository(policy), unitOfWork, new PolicyResponseFactory());
+        var service = new UnderwritePolicyService(new FakePolicyRepository(policy), unitOfWork, new FakeCustomerAccessValidator(), new PolicyResponseFactory());
 
         var response = await service.TransitionAsync(
             policy.Id,
             new TransitionPolicyStatusRequest(PolicyStatus.PendingApproval, "Submitted for underwriting review."),
-            new PolicyActor(Guid.NewGuid(), true));
+            new PolicyActor(Guid.NewGuid(), true, true));
 
         Assert.Equal(PolicyStatus.PendingApproval, response.Status);
         Assert.Contains(response.History, item => item.Status == PolicyStatus.PendingApproval);
@@ -29,7 +29,7 @@ public sealed class UnderwritePolicyServiceTests
     public async Task TransitionAsync_WhenCallerIsNotUnderwriter_ThrowsForbiddenException()
     {
         var policy = TestPolicyFactory.CreatePolicy();
-        var service = new UnderwritePolicyService(new FakePolicyRepository(policy), new FakeUnitOfWork(), new PolicyResponseFactory());
+        var service = new UnderwritePolicyService(new FakePolicyRepository(policy), new FakeUnitOfWork(), new FakeCustomerAccessValidator(), new PolicyResponseFactory());
 
         var action = () => service.TransitionAsync(
             policy.Id,
