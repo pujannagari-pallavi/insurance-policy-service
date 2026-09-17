@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IUpdatePolicyService, UpdatePolicyService>();
         services.AddScoped<IUnderwritePolicyService, UnderwritePolicyService>();
         services.AddScoped<IPolicyTypeQueryService, PolicyTypeQueryService>();
+        services.AddScoped<IPolicyTypeCommandService, PolicyTypeCommandService>();
 
         return services;
     }

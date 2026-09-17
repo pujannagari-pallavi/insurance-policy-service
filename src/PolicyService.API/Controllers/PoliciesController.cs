@@ -16,6 +16,7 @@ public sealed class PoliciesController(
     IUpdatePolicyService updatePolicyService,
     IUnderwritePolicyService underwritePolicyService,
     IPolicyTypeQueryService policyTypeQueryService,
+    IPolicyTypeCommandService policyTypeCommandService,
     ICustomerAccessValidator customerAccessValidator) : ControllerBase
 {
     [HttpGet("mine")]
@@ -89,6 +90,17 @@ public sealed class PoliciesController(
     {
         var response = await policyTypeQueryService.GetAllAsync(cancellationToken);
         return Ok(response);
+    }
+
+    [HttpPost("types")]
+    [ProducesResponseType<PolicyTypeResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> CreatePolicyType(CreatePolicyTypeRequest request, CancellationToken cancellationToken)
+    {
+        if (!User.HasClaim("permission", "Policy.Write.Any")) return Forbid();
+        var response = await policyTypeCommandService.CreateAsync(request, cancellationToken);
+        return Created($"api/policies/types/{response.Id}", response);
     }
 
     private PolicyActor GetActor()
