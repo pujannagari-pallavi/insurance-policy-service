@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 #nullable disable
 
 namespace PolicyService.Infrastructure.Persistence.Migrations;
 
+[Migration("20260917120000_AddPremiumSelectionMetadata")]
 public partial class AddPremiumSelectionMetadata : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
