@@ -41,7 +41,9 @@ public sealed class PolicyResponseFactory
                     history.Status,
                     history.Remarks,
                     history.ChangedAtUtc))
-                .ToArray());
+                .ToArray(),
+            policy.PremiumPlanId,
+            policy.PremiumFrequency);
     }
 
     public PolicyTypeResponse Create(PolicyType policyType)

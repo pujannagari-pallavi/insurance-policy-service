@@ -46,7 +46,9 @@ public sealed class CreatePolicyService(
             request.PolicyTypeId,
             request.StartDate,
             request.EndDate,
-            premiumAmount);
+            premiumAmount,
+            request.PremiumPlanId,
+            request.PremiumFrequency);
 
         policy.AttachPolicyType(policyType);
         policy.SetCoverages(MapCoverages(request.Coverages));

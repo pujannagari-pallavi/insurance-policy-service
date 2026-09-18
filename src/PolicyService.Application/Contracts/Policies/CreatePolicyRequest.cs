@@ -6,4 +6,6 @@ public sealed record CreatePolicyRequest(
     DateOnly StartDate,
     DateOnly EndDate,
     IReadOnlyCollection<CoverageRequest> Coverages,
-    string? Remarks);
+    string? Remarks,
+    string? PremiumPlanId = null,
+    string? PremiumFrequency = null);

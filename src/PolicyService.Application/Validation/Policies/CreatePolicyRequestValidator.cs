@@ -28,6 +28,11 @@ public sealed class CreatePolicyRequestValidator : IValidator<CreatePolicyReques
             throw new ValidationException("At least one coverage is required.");
         }
 
+        if (string.IsNullOrWhiteSpace(value.PremiumPlanId) != string.IsNullOrWhiteSpace(value.PremiumFrequency))
+        {
+            throw new ValidationException("Premium plan id and premium frequency must be provided together.");
+        }
+
         foreach (var coverage in value.Coverages)
         {
             if (string.IsNullOrWhiteSpace(coverage.Name))

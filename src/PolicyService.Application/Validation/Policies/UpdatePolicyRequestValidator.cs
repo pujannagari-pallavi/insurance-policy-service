@@ -15,6 +15,8 @@ public sealed class UpdatePolicyRequestValidator : IValidator<UpdatePolicyReques
             value.StartDate,
             value.EndDate,
             value.Coverages,
-            value.Remarks));
+            value.Remarks,
+            value.PremiumPlanId,
+            value.PremiumFrequency));
     }
 }

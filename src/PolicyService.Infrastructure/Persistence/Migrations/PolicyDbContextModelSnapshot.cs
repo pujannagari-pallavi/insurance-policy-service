@@ -48,6 +48,14 @@ namespace PolicyService.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("PremiumAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("PremiumFrequency")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("PremiumPlanId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 

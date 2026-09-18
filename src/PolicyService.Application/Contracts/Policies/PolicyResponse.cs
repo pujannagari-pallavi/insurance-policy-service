@@ -14,7 +14,9 @@ public sealed record PolicyResponse(
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc,
     IReadOnlyCollection<CoverageResponse> Coverages,
-    IReadOnlyCollection<PolicyHistoryResponse> History);
+    IReadOnlyCollection<PolicyHistoryResponse> History,
+    string? PremiumPlanId = null,
+    string? PremiumFrequency = null);
 
 public sealed record PolicyTypeResponse(
     Guid Id,

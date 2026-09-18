@@ -56,7 +56,9 @@ public sealed class UpdatePolicyService(
             request.EndDate,
             premiumAmount,
             request.Status,
-            request.Remarks);
+            request.Remarks,
+            request.PremiumPlanId,
+            request.PremiumFrequency);
         policy.SetCoverages(MapCoverages(request.Coverages));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

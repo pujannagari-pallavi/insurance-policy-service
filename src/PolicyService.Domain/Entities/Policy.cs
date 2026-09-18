@@ -16,7 +16,9 @@ public sealed class Policy
         Guid policyTypeId,
         DateOnly startDate,
         DateOnly endDate,
-        decimal premiumAmount)
+        decimal premiumAmount,
+        string? premiumPlanId = null,
+        string? premiumFrequency = null)
     {
         Id = id;
         PolicyNumber = policyNumber.Trim();
@@ -25,6 +27,8 @@ public sealed class Policy
         StartDate = startDate;
         EndDate = endDate;
         PremiumAmount = premiumAmount;
+        PremiumPlanId = premiumPlanId?.Trim();
+        PremiumFrequency = premiumFrequency?.Trim();
         Status = PolicyStatus.Draft;
         CreatedAtUtc = DateTime.UtcNow;
     }
@@ -44,6 +48,10 @@ public sealed class Policy
     public DateOnly EndDate { get; private set; }
 
     public decimal PremiumAmount { get; private set; }
+
+    public string? PremiumPlanId { get; private set; }
+
+    public string? PremiumFrequency { get; private set; }
 
     public PolicyStatus Status { get; private set; }
 
@@ -67,13 +75,15 @@ public sealed class Policy
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
-    public void Update(Guid customerId, Guid policyTypeId, DateOnly startDate, DateOnly endDate, decimal premiumAmount, PolicyStatus status, string remarks)
+    public void Update(Guid customerId, Guid policyTypeId, DateOnly startDate, DateOnly endDate, decimal premiumAmount, PolicyStatus status, string remarks, string? premiumPlanId = null, string? premiumFrequency = null)
     {
         CustomerId = customerId;
         PolicyTypeId = policyTypeId;
         StartDate = startDate;
         EndDate = endDate;
         PremiumAmount = premiumAmount;
+        PremiumPlanId = premiumPlanId?.Trim();
+        PremiumFrequency = premiumFrequency?.Trim();
         Status = status;
         UpdatedAtUtc = DateTime.UtcNow;
         AddHistory("Updated", status, remarks);

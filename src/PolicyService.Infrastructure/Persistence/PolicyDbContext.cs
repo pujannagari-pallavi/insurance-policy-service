@@ -30,6 +30,8 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
         builder.HasKey(policy => policy.Id);
         builder.Property(policy => policy.PolicyNumber).HasMaxLength(50).IsRequired();
         builder.Property(policy => policy.PremiumAmount).HasColumnType("decimal(18,2)").IsRequired();
+        builder.Property(policy => policy.PremiumPlanId).HasMaxLength(100);
+        builder.Property(policy => policy.PremiumFrequency).HasMaxLength(30);
         builder.Property(policy => policy.Status).IsRequired();
         builder.Property(policy => policy.CreatedAtUtc).IsRequired();
         builder.HasIndex(policy => policy.PolicyNumber).IsUnique();
@@ -47,6 +49,7 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
             coverageBuilder.ToTable("PolicyCoverages");
             coverageBuilder.WithOwner().HasForeignKey("PolicyId");
             coverageBuilder.HasKey(coverage => coverage.Id);
+            coverageBuilder.Property(coverage => coverage.Id).ValueGeneratedNever();
             coverageBuilder.Property(coverage => coverage.Name).HasMaxLength(100).IsRequired();
             coverageBuilder.Property(coverage => coverage.Description).HasMaxLength(256).IsRequired();
             coverageBuilder.Property(coverage => coverage.SumInsured).HasColumnType("decimal(18,2)").IsRequired();
@@ -58,6 +61,7 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
             historyBuilder.ToTable("PolicyHistory");
             historyBuilder.WithOwner().HasForeignKey("PolicyId");
             historyBuilder.HasKey(history => history.Id);
+            historyBuilder.Property(history => history.Id).ValueGeneratedNever();
             historyBuilder.Property(history => history.Action).HasMaxLength(100).IsRequired();
             historyBuilder.Property(history => history.Remarks).HasMaxLength(512).IsRequired();
             historyBuilder.Property(history => history.Status).IsRequired();
