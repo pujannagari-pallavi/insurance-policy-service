@@ -1,4 +1,5 @@
 using PolicyService.Application.Contracts.Policies;
+using PolicyService.Application.Exceptions;
 using PolicyService.Domain.Entities;
 using PolicyService.Domain.Repositories;
 
@@ -15,9 +16,9 @@ public sealed class PolicyTypeCommandService(
         var name = request.Name.Trim();
         var description = request.Description.Trim();
         if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(description) || request.BasePremium <= 0)
-            throw new ArgumentException("Code, name, description, and a positive base premium are required.");
+            throw new ValidationException("Code, name, description, and a positive base premium are required.");
         if (await policyTypeRepository.ExistsByCodeAsync(code, cancellationToken))
-            throw new ArgumentException("A policy type with this code already exists.");
+            throw new ValidationException("A policy type with this code already exists.");
 
         var policyType = new PolicyType(Guid.NewGuid(), code, name, description, request.BasePremium);
         await policyTypeRepository.AddAsync(policyType, cancellationToken);

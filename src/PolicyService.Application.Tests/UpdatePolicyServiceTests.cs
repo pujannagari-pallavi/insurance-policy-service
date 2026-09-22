@@ -90,6 +90,16 @@ public sealed class UpdatePolicyServiceTests
 
     private sealed class FakePolicyTypeRepository(PolicyType? policyType) : IPolicyTypeRepository
     {
+        public Task AddAsync(PolicyType policyType, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(false);
+        }
+
         public Task<PolicyType?> GetByIdAsync(Guid policyTypeId, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(policyType);
