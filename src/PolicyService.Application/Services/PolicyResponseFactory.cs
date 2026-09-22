@@ -18,7 +18,8 @@ public sealed class PolicyResponseFactory
                 policyType.Code,
                 policyType.Name,
                 policyType.Description,
-                policyType.BasePremium),
+                policyType.BasePremium,
+                policyType.IsAvailable),
             policy.StartDate,
             policy.EndDate,
             policy.PremiumAmount,
@@ -53,6 +54,7 @@ public sealed class PolicyResponseFactory
             policyType.Code,
             policyType.Name,
             policyType.Description,
-            policyType.BasePremium);
+            policyType.BasePremium,
+            policyType.IsAvailable);
     }
 }

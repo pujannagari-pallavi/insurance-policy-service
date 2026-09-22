@@ -103,6 +103,20 @@ public sealed class PoliciesController(
         return Created($"api/policies/types/{response.Id}", response);
     }
 
+    [HttpPatch("types/{policyTypeId:guid}/availability")]
+    [ProducesResponseType<PolicyTypeResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetPolicyTypeAvailability(
+        Guid policyTypeId,
+        UpdatePolicyTypeAvailabilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!User.HasClaim("permission", "Policy.Write.Any")) return Forbid();
+        var response = await policyTypeCommandService.SetAvailabilityAsync(policyTypeId, request.IsAvailable, cancellationToken);
+        return Ok(response);
+    }
+
     private PolicyActor GetActor()
     {
         var identityUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);

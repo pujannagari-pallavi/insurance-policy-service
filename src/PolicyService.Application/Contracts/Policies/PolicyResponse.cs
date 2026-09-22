@@ -23,7 +23,8 @@ public sealed record PolicyTypeResponse(
     string Code,
     string Name,
     string Description,
-    decimal BasePremium);
+    decimal BasePremium,
+    bool IsAvailable = true);
 
 public sealed record CoverageResponse(
     Guid Id,

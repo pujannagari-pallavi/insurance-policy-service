@@ -25,4 +25,14 @@ public sealed class PolicyTypeCommandService(
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return policyResponseFactory.Create(policyType);
     }
+
+    public async Task<PolicyTypeResponse> SetAvailabilityAsync(Guid policyTypeId, bool isAvailable, CancellationToken cancellationToken = default)
+    {
+        var policyType = await policyTypeRepository.GetByIdAsync(policyTypeId, cancellationToken)
+            ?? throw new NotFoundException("Policy type was not found.");
+
+        policyType.SetAvailability(isAvailable);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return policyResponseFactory.Create(policyType);
+    }
 }

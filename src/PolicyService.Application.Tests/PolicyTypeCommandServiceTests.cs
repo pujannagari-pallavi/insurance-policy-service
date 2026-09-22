@@ -38,7 +38,34 @@ public sealed class PolicyTypeCommandServiceTests
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 
-    private sealed class FakePolicyTypeRepository(bool codeExists = false) : IPolicyTypeRepository
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SetAvailabilityAsync_WhenPolicyTypeExists_UpdatesAvailability(bool isAvailable)
+    {
+        var policyType = new PolicyType(Guid.NewGuid(), "TRAVEL", "Travel", "Travel cover", 1000);
+        var repository = new FakePolicyTypeRepository(policyType: policyType);
+        var unitOfWork = new FakeUnitOfWork();
+        var service = new PolicyTypeCommandService(repository, new PolicyResponseFactory(), unitOfWork);
+
+        var response = await service.SetAvailabilityAsync(policyType.Id, isAvailable);
+
+        Assert.Equal(isAvailable, policyType.IsAvailable);
+        Assert.Equal(isAvailable, response.IsAvailable);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task SetAvailabilityAsync_WhenPolicyTypeDoesNotExist_ThrowsNotFoundException()
+    {
+        var service = new PolicyTypeCommandService(new FakePolicyTypeRepository(), new PolicyResponseFactory(), new FakeUnitOfWork());
+
+        var action = () => service.SetAvailabilityAsync(Guid.NewGuid(), false);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+    }
+
+    private sealed class FakePolicyTypeRepository(bool codeExists = false, PolicyType? policyType = null) : IPolicyTypeRepository
     {
         public PolicyType? AddedPolicyType { get; private set; }
 
@@ -55,7 +82,7 @@ public sealed class PolicyTypeCommandServiceTests
 
         public Task<PolicyType?> GetByIdAsync(Guid policyTypeId, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<PolicyType?>(null);
+            return Task.FromResult(policyType?.Id == policyTypeId ? policyType : null);
         }
 
         public Task<IReadOnlyCollection<PolicyType>> GetAllAsync(CancellationToken cancellationToken = default)

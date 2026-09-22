@@ -50,5 +50,10 @@ public sealed class PolicyApiFactory(
         {
             return Task.FromResult(new PolicyTypeResponse(Guid.NewGuid(), request.Code, request.Name, request.Description, request.BasePremium));
         }
+
+        public Task<PolicyTypeResponse> SetAvailabilityAsync(Guid policyTypeId, bool isAvailable, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new PolicyTypeResponse(policyTypeId, "TEST", "Test", "Test policy type", 1000m, isAvailable));
+        }
     }
 }

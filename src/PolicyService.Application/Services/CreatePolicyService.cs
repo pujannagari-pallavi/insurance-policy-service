@@ -32,6 +32,10 @@ public sealed class CreatePolicyService(
 
         var policyType = await policyTypeRepository.GetByIdAsync(request.PolicyTypeId, cancellationToken)
             ?? throw new NotFoundException("Policy type was not found.");
+        if (!policyType.IsAvailable)
+        {
+            throw new ValidationException("This policy type is archived and cannot be used for new policies.");
+        }
 
         var premiumAmount = premiumRatingService.CalculateAnnualPremium(
             policyType,

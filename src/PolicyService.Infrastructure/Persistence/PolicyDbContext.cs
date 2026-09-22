@@ -79,6 +79,7 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
         builder.Property(policyType => policyType.Name).HasMaxLength(100).IsRequired();
         builder.Property(policyType => policyType.Description).HasMaxLength(256).IsRequired();
         builder.Property(policyType => policyType.BasePremium).HasColumnType("decimal(18,2)").IsRequired();
+        builder.Property(policyType => policyType.IsAvailable).HasDefaultValue(true).IsRequired();
         builder.HasIndex(policyType => policyType.Code).IsUnique();
     }
 
@@ -91,7 +92,8 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
                 Code = "HEALTH_STANDARD",
                 Name = "Health Standard",
                 Description = "Standard individual health policy.",
-                BasePremium = 12500m
+                BasePremium = 12500m,
+                IsAvailable = true
             },
             new
             {
@@ -99,7 +101,8 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
                 Code = "AUTO_COMPREHENSIVE",
                 Name = "Auto Comprehensive",
                 Description = "Comprehensive motor insurance coverage.",
-                BasePremium = 9300m
+                BasePremium = 9300m,
+                IsAvailable = true
             },
             new
             {
@@ -107,7 +110,8 @@ public sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options) :
                 Code = "LIFE_PROTECT",
                 Name = "Life Protect",
                 Description = "Long-term life protection policy.",
-                BasePremium = 15000m
+                BasePremium = 15000m,
+                IsAvailable = true
             });
     }
 }

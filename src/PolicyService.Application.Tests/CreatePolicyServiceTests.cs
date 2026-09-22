@@ -59,6 +59,30 @@ public sealed class CreatePolicyServiceTests
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 
+    [Fact]
+    public async Task CreateAsync_WhenPolicyTypeIsArchived_DoesNotPersistPolicy()
+    {
+        var repository = new FakePolicyRepository();
+        var policyType = TestPolicyFactory.CreatePolicyType();
+        policyType.SetAvailability(false);
+        var unitOfWork = new FakeUnitOfWork();
+        var service = new CreatePolicyService(
+            repository,
+            new FakePolicyTypeRepository(policyType),
+            unitOfWork,
+            new PassThroughValidator<CreatePolicyRequest>(),
+            new FakeCustomerAccessValidator(),
+            new PremiumRatingService(),
+            new PolicyResponseFactory());
+
+        var action = () => service.CreateAsync(TestRequests.CreatePolicyRequest(), TestActors.Default);
+
+        var exception = await Assert.ThrowsAsync<ValidationException>(action);
+        Assert.Equal("This policy type is archived and cannot be used for new policies.", exception.Message);
+        Assert.Null(repository.AddedPolicy);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
+    }
+
     private sealed class FakePolicyRepository : IPolicyRepository
     {
         public Policy? PolicyById { get; init; }
