@@ -19,7 +19,12 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<PolicyDbContext>(options =>
-            options.UseNpgsql(NormalizePostgresConnectionString(configuration.GetConnectionString("PolicyDatabase"))));
+            options.UseNpgsql(
+                NormalizePostgresConnectionString(
+                    configuration.GetConnectionString("PolicyDatabase")
+                    ?? configuration["POLICY_DATABASE_CONNECTION_STRING"]
+                    ?? configuration["DATABASE_URL"]),
+                npgsql => npgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
         var customerServiceBaseUrl = configuration["Services:Customer:BaseUrl"]
             ?? throw new InvalidOperationException("Customer Service base URL is missing.");
