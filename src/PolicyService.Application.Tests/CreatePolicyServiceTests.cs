@@ -175,7 +175,7 @@ internal sealed class FakeCustomerAccessValidator(Exception? exception = null) :
 
 internal static class TestActors
 {
-    public static readonly PolicyActor Default = new(Guid.Parse("93CD493C-126D-494F-B955-3AE5C0239CFC"), false, false);
+    public static readonly PolicyActor Default = new(Guid.Parse("93CD493C-126D-494F-B955-3AE5C0239CFC"), false, false, false);
 }
 
 internal static class TestRequests

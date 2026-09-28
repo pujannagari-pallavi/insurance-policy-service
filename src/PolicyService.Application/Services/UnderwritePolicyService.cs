@@ -18,11 +18,6 @@ public sealed class UnderwritePolicyService(
         PolicyActor actor,
         CancellationToken cancellationToken = default)
     {
-        if (!actor.CanUnderwrite)
-        {
-            throw new ForbiddenException("Only an underwriter can change a policy status.");
-        }
-
         if (string.IsNullOrWhiteSpace(request.Remarks))
         {
             throw new ValidationException("Underwriting remarks are required.");
@@ -30,6 +25,25 @@ public sealed class UnderwritePolicyService(
 
         var policy = await policyRepository.GetByIdAsync(policyId, cancellationToken)
             ?? throw new NotFoundException("Policy was not found.");
+
+        if (policy.Status is PolicyStatus.Draft && request.Status is PolicyStatus.PendingApproval)
+        {
+            if (!actor.CanSubmitOwnPolicy)
+            {
+                throw new ForbiddenException("Only the policy customer can submit a draft application for underwriting review.");
+            }
+
+            await customerAccessValidator.EnsureAccessAsync(
+                policy.CustomerId,
+                actor.IdentityUserId,
+                actor.CanManageAnyPolicy,
+                requireVerifiedKyc: true,
+                cancellationToken);
+        }
+        else if (!actor.CanUnderwrite)
+        {
+            throw new ForbiddenException("Only an underwriter can approve, decline, or manage a policy status.");
+        }
 
         if (!Policy.CanTransition(policy.Status, request.Status))
         {

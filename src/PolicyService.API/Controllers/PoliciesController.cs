@@ -128,6 +128,7 @@ public sealed class PoliciesController(
         return new PolicyActor(
             userId,
             User.HasClaim("permission", "Policy.Write.Any"),
-            User.HasClaim("permission", "Policy.Approve"));
+            User.HasClaim("permission", "Policy.Approve"),
+            User.HasClaim("permission", "Policy.Write"));
     }
 }

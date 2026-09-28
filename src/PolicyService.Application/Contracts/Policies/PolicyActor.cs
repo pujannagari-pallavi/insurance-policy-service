@@ -1,3 +1,3 @@
 namespace PolicyService.Application.Contracts.Policies;
 
-public sealed record PolicyActor(Guid IdentityUserId, bool CanManageAnyPolicy, bool CanUnderwrite);
+public sealed record PolicyActor(Guid IdentityUserId, bool CanManageAnyPolicy, bool CanUnderwrite, bool CanSubmitOwnPolicy);

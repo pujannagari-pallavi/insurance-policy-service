@@ -9,7 +9,7 @@ namespace PolicyService.Application.Tests;
 public sealed class UnderwritePolicyServiceTests
 {
     [Fact]
-    public async Task TransitionAsync_WhenUnderwriterSubmitsDraft_MovesPolicyToPendingApproval()
+    public async Task TransitionAsync_WhenCustomerSubmitsDraft_MovesPolicyToPendingApproval()
     {
         var policy = TestPolicyFactory.CreatePolicy();
         var unitOfWork = new FakeUnitOfWork();
@@ -18,7 +18,7 @@ public sealed class UnderwritePolicyServiceTests
         var response = await service.TransitionAsync(
             policy.Id,
             new TransitionPolicyStatusRequest(PolicyStatus.PendingApproval, "Submitted for underwriting review."),
-            new PolicyActor(Guid.NewGuid(), true, true));
+            new PolicyActor(Guid.NewGuid(), false, false, true));
 
         Assert.Equal(PolicyStatus.PendingApproval, response.Status);
         Assert.Contains(response.History, item => item.Status == PolicyStatus.PendingApproval);
@@ -26,7 +26,7 @@ public sealed class UnderwritePolicyServiceTests
     }
 
     [Fact]
-    public async Task TransitionAsync_WhenCallerIsNotUnderwriter_ThrowsForbiddenException()
+    public async Task TransitionAsync_WhenCustomerDoesNotHaveSubmissionPermission_ThrowsForbiddenException()
     {
         var policy = TestPolicyFactory.CreatePolicy();
         var service = new UnderwritePolicyService(new FakePolicyRepository(policy), new FakeUnitOfWork(), new FakeCustomerAccessValidator(), new PolicyResponseFactory());
