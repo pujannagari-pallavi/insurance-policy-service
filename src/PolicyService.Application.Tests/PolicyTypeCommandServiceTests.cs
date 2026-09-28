@@ -39,6 +39,22 @@ public sealed class PolicyTypeCommandServiceTests
     }
 
     [Theory]
+    [InlineData("AB", "Travel Basic", "Coverage for travel-related risks.", 1000)]
+    [InlineData("TRAVEL_BASIC", "X", "Coverage for travel-related risks.", 1000)]
+    [InlineData("TRAVEL_BASIC", "Travel Basic", "Too short", 1000)]
+    [InlineData("TRAVEL_BASIC", "Travel Basic", "Coverage for travel-related risks.", 1)]
+    [InlineData("TRAVEL_BASIC", "Travel Basic", "Coverage for travel-related risks.", 1000001)]
+    public async Task CreateAsync_WhenProductGovernanceRulesFail_ThrowsValidationException(string code, string name, string description, decimal basePremium)
+    {
+        var repository = new FakePolicyTypeRepository();
+        var service = new PolicyTypeCommandService(repository, new PolicyResponseFactory(), new FakeUnitOfWork());
+
+        await Assert.ThrowsAsync<ValidationException>(() => service.CreateAsync(new CreatePolicyTypeRequest(code, name, description, basePremium)));
+
+        Assert.Null(repository.AddedPolicyType);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task SetAvailabilityAsync_WhenPolicyTypeExists_UpdatesAvailability(bool isAvailable)
